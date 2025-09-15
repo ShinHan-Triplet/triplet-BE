@@ -1,4 +1,4 @@
-package org.zerock.triplet.domain.member.service;
+package org.zerock.triplet.security.oauth;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,7 +12,6 @@ import org.zerock.triplet.domain.member.entity.Member;
 import org.zerock.triplet.domain.member.repository.MemberRepository;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
