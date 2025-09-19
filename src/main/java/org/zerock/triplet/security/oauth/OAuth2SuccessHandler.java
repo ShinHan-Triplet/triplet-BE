@@ -39,8 +39,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     ) throws IOException{
         OAuth2User principal = (OAuth2User) authentication.getPrincipal();
         String oauthId = (String) principal.getAttributes().get("id");
-        String email = (String) principal.getAttributes().get("email");
-        String name = (String) principal.getAttributes().get("name");
 
         Member member = memberRepository.findByOauthId(oauthId).orElseThrow();
 
