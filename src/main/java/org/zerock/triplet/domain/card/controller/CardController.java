@@ -22,4 +22,9 @@ public class CardController {
     public ResponseEntity<List<CardWithBenefitsDTO>> list(@RequestParam("themeNum") Integer theme){
         return ResponseEntity.ok(service.listByTheme(theme));
     }
+
+    @GetMapping("/list")
+    public ResponseEntity<List<CardWithBenefitsDTO>> list(){
+        return ResponseEntity.ok(service.cardList());
+    }
 }

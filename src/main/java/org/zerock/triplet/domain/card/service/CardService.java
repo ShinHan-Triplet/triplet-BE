@@ -30,4 +30,22 @@ public class CardService {
                 ))
                 .toList();
     }
+
+    public List<CardWithBenefitsDTO> cardList(){
+        return repo.findAll().stream()
+                .map(c -> new CardWithBenefitsDTO(
+                        c.getId(),
+                        c.getName(),
+                        c.getIntro(),
+                        c.getDesc(),
+                        c.getBenefits().stream()
+                                .map(b-> new BenefitDTO(
+                                        b.getBenefitTitle(),
+                                        b.getBenefitContent(),
+                                        b.getShortTitle(),
+                                        b.getShortContent()))
+                                .toList()
+                ))
+                .toList();
+    }
 }

@@ -40,6 +40,6 @@ public class Trip {
     @Column(name = "insurance_cost", nullable = false)
     private Long insuranceCost;
 
-    @Column(name = "trip_img", nullable = false, length = 120)
-    private String tripImg;
+    @Column(name = "trip_img", nullable = true, length = 120)
+    private String tripImg;  // s3 최종 키 또는 파일명
 }

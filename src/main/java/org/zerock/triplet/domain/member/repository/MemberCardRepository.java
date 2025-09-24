@@ -25,5 +25,7 @@ public interface MemberCardRepository extends JpaRepository<MemberCard, Long> {
     """)
     List<MemberCardDTO> findPersonalCards(@Param("memberId") Long memberId);
 
+    MemberCard findMemberCardById(Long cardId);
+
 
 }

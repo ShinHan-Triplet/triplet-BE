@@ -4,8 +4,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.parameters.P;
+import org.zerock.triplet.domain.gather.entity.Gather;
 import org.zerock.triplet.domain.gather.entity.GatherMapping;
 import org.zerock.triplet.domain.member.dto.MemberIdsByGatherDTO;
+import org.zerock.triplet.domain.member.entity.Member;
 
 import java.util.List;
 
@@ -43,4 +45,6 @@ public interface GatherMappingRepository extends JpaRepository<GatherMapping, Lo
    where gm.gather.id in :gatherIds
 """)
     List<MemberIdsByGatherDTO> findMemberIdsByGatherIds(@Param("gatherIds") List<Long> gatherIds);
+
+    boolean existsByGatherAndMember(Gather gather, Member member);
 }
