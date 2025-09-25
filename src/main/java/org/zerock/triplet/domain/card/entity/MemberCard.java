@@ -1,8 +1,8 @@
-package org.zerock.triplet.domain.member.entity;
+package org.zerock.triplet.domain.card.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.zerock.triplet.domain.card.entity.Card;
+import org.zerock.triplet.domain.member.entity.Member;
 
 
 @Entity

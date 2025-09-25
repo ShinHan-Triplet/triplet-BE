@@ -8,7 +8,7 @@ import org.zerock.triplet.domain.gather.entity.Gather;
 import org.zerock.triplet.domain.gather.repository.GatherMappingRepository;
 import org.zerock.triplet.domain.gather.repository.GatherRepository;
 import org.zerock.triplet.domain.member.dto.MemberIdsByGatherDTO;
-import org.zerock.triplet.domain.member.repository.MemberCardRepository;
+import org.zerock.triplet.domain.card.repository.MemberCardRepository;
 import org.zerock.triplet.domain.member.repository.MemberRepository;
 import org.zerock.triplet.domain.member.dto.IdName;
 
