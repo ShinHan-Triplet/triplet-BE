@@ -11,7 +11,7 @@ import org.zerock.triplet.domain.gather.entity.GatherMapping;
 import org.zerock.triplet.domain.gather.repository.GatherMappingRepository;
 import org.zerock.triplet.domain.gather.repository.GatherRepository;
 import org.zerock.triplet.domain.member.entity.Member;
-import org.zerock.triplet.domain.member.repository.MemberCardRepository;
+import org.zerock.triplet.domain.card.repository.MemberCardRepository;
 import org.zerock.triplet.domain.trip.dto.PublishReq;
 import org.zerock.triplet.domain.trip.dto.PublishResult;
 import org.zerock.triplet.domain.trip.entity.Cost;
@@ -24,7 +24,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 @RequiredArgsConstructor

@@ -1,10 +1,10 @@
-package org.zerock.triplet.domain.member.repository;
+package org.zerock.triplet.domain.card.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.zerock.triplet.domain.gather.dto.MemberCardDTO;
-import org.zerock.triplet.domain.member.entity.MemberCard;
+import org.zerock.triplet.domain.card.entity.MemberCard;
 
 import java.util.List;
 
@@ -26,6 +26,7 @@ public interface MemberCardRepository extends JpaRepository<MemberCard, Long> {
     List<MemberCardDTO> findPersonalCards(@Param("memberId") Long memberId);
 
     MemberCard findMemberCardById(Long cardId);
+
 
 
 }

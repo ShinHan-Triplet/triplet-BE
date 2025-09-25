@@ -2,7 +2,7 @@ package org.zerock.triplet.domain.gather.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.zerock.triplet.domain.member.entity.MemberCard;
+import org.zerock.triplet.domain.card.entity.MemberCard;
 
 @Entity
 @Table(name = "gathers")
