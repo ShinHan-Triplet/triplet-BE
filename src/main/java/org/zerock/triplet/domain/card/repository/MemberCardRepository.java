@@ -28,4 +28,5 @@ public interface MemberCardRepository extends JpaRepository<MemberCard, Long> {
     MemberCard findMemberCardById(Long cardId);
 
 
+
 }
