@@ -9,4 +9,6 @@ import java.util.List;
 public interface CardRepository extends JpaRepository<Card, Long> {
     @EntityGraph(attributePaths = "benefits")
     List<Card> findByTheme(Integer theme);
+    Card findCardById(Long id);
+
 }

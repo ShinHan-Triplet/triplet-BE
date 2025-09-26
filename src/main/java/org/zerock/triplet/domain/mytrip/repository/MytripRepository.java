@@ -205,4 +205,5 @@ public interface MytripRepository extends JpaRepository<Trip, Long> {
             @Param("tripId") Long tripId,
             @Param("plannedFlag") Integer plannedFlag
     );
+
 }

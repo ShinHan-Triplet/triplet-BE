@@ -39,6 +39,16 @@ public class MytripController {
         return ResponseEntity.ok(body);
     }
 
+    // 내 여행 예산계획
+    @GetMapping("/{tripId}/budgets")
+    public List<CostPlan> getCostPlan(
+            @PathVariable Long tripId,
+            @AuthenticationPrincipal Member me
+    ){
+        if (me == null) throw new IllegalStateException("로그인이 필요합니다.");
+        return  mytripService.getCostPlan(tripId);
+    }
+
     /** 내 여행 특정 일자 사용 내역 (네가 요구한 시그니처) */
     @GetMapping("/{tripId}/usages")
     public ResponseEntity<UsageDayResponse> getUsagesByDate(

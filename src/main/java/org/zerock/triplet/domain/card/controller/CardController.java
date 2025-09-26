@@ -2,13 +2,15 @@ package org.zerock.triplet.domain.card.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import org.zerock.triplet.domain.card.dto.CardReqDTO;
 import org.zerock.triplet.domain.card.dto.CardWithBenefitsDTO;
+import org.zerock.triplet.domain.card.entity.MemberCard;
 import org.zerock.triplet.domain.card.service.CardService;
+import org.zerock.triplet.domain.member.entity.Member;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -27,4 +29,15 @@ public class CardController {
     public ResponseEntity<List<CardWithBenefitsDTO>> list(){
         return ResponseEntity.ok(service.cardList());
     }
+
+    @PostMapping("/apply")
+    public ResponseEntity<Long> applyCard(
+            @AuthenticationPrincipal Member member,
+            @RequestBody CardReqDTO req){
+        MemberCard saved = service.cardApply(member, req);
+        // Location 헤더까지 깔끔하게
+        URI location = URI.create("/api/card/" + saved.getId());
+        return ResponseEntity.created(location).body(saved.getId());
+    }
+
 }
