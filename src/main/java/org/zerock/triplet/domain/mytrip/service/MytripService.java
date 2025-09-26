@@ -2,6 +2,7 @@ package org.zerock.triplet.domain.mytrip.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.zerock.triplet.domain.mytrip.dto.*;
 import org.zerock.triplet.domain.mytrip.repository.MytripRepository;
 import org.zerock.triplet.domain.trip.entity.Trip;
@@ -159,8 +160,10 @@ public class MytripService {
         long insurancePlanned = planBasics.get().getInsuranceCost();
 
         // 4-2) 식비/교통/여가/기타: cost 합계 (계획=1 / 실사용=0)
-        var planSum = mytripRepository.findBudgetTotal(tripId, 1).get();
-        var usedSum = mytripRepository.findBudgetTotal(tripId, 0).get();
+        var planSum = mytripRepository.findBudgetTotal(tripId, true)
+                .orElse(new BudgetTotal(0L,0L,0L,0L));
+        var usedSum = mytripRepository.findBudgetTotal(tripId, false)
+                .orElse(new BudgetTotal(0L,0L,0L,0L));
 
         long planFood = planSum.getFood();
         long planTrans = planSum.getTransport();
@@ -217,6 +220,40 @@ public class MytripService {
                 .status(status)
                 .card(card)
                 .budget(budget)
+                .total(h.getTotalCost())
+                .build();
+    }
+
+    // 여행 카드 내역 상세
+    @Transactional(readOnly = true)
+    public UsageDayResponse getTripUsages(Long tripId, Long memberId) {
+        // 1) trip 기간 조회
+        var tripOpt = mytripRepository.findById(tripId);
+        if (tripOpt.isEmpty()) {
+            throw new NoSuchElementException("Trip not found: " + tripId);
+        }
+        var trip = tripOpt.get();
+
+        Long mcardId = mytripRepository.findTripMcardId(tripId).orElse(null);
+        LocalDateTime from = trip.getStartDate().toLocalDate().atStartOfDay();
+        LocalDateTime to   = trip.getEndDate().toLocalDate().plusDays(1).atStartOfDay();
+
+        // 2) 기간 내 usage 조회
+        List<UsageItem> usages = mytripRepository.findTripUsageItems(mcardId, from, to);
+
+        // 3) 합계 계산
+        long total = usages.stream()
+                .mapToLong(u -> u.getAmount() == null ? 0 : u.getAmount())
+                .sum();
+
+        // 4) Response 조립
+        return UsageDayResponse.builder()
+                .tripId(tripId)
+                .day(UsageDay.builder()
+                        .date(LocalDate.now())
+                        .dayTotalUsed(total)
+                        .items(usages)
+                        .build())
                 .build();
     }
 

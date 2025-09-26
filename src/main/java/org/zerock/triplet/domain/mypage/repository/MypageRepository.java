@@ -26,7 +26,9 @@ public interface MypageRepository extends JpaRepository<Gather, Long> {
         from GatherMapping gm
         join gm.member m
         where gm.gather.id in :gatherIds
-        order by gm.gather.id, m.name
+        order by gm.gather.id,
+                 case when gm.checkOwner = true then 0 else 1 end,
+                 m.name
     """)
     List<Object[]> findMemberNamesByGatherIds(@Param("gatherIds") Collection<Long> gatherIds);
 

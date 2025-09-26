@@ -26,4 +26,5 @@ public class TripDetailResponse {
     private String status;
     private TripCard card;         // 연결 카드 정보
     private List<BudgetItem> budget;
+    private Long total;
 }

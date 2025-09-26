@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.zerock.triplet.domain.mytrip.dto.*;
 import org.zerock.triplet.domain.trip.entity.Trip;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -138,8 +139,8 @@ public interface MytripRepository extends JpaRepository<Trip, Long> {
         u.id,
         u.category,
         case u.category
-            when 1 then '숙박'
-            when 2 then '보험'
+            when 1 then '숙박비'
+            when 2 then '보험비'
             when 3 then '식비'
             when 4 then '교통비'
             when 5 then '여가비'
@@ -191,18 +192,44 @@ public interface MytripRepository extends JpaRepository<Trip, Long> {
 
     @Query("""
         select new org.zerock.triplet.domain.mytrip.dto.BudgetTotal(
-            cast(0 as long),
-            cast(0 as long),
-            cast(0 as long),
-            cast(0 as long),
-            cast(0 as long)
+          sum(c.food),
+          sum(c.transport),
+          sum(c.leisure),
+          sum(c.etc)
         )
-        from Trip t
-        where t.id = :tripId
-          and :plannedFlag = :plannedFlag
+        from Cost c
+        where c.trip.id = :tripId
     """)
-    Optional<org.zerock.triplet.domain.mytrip.dto.BudgetTotal> findBudgetTotal(
-            @Param("tripId") Long tripId,
-            @Param("plannedFlag") Integer plannedFlag
-    );
+        Optional<org.zerock.triplet.domain.mytrip.dto.BudgetTotal> findBudgetTotal(
+                @Param("tripId") Long tripId,
+                @Param("planned") Boolean planned
+        );
+
+    @Query("""
+      select new org.zerock.triplet.domain.mytrip.dto.UsageItem(
+        u.id,
+        u.category,
+        case u.category
+          when 1 then '숙박비'
+          when 2 then '보험비'
+          when 3 then '식비'
+          when 4 then '교통비'
+          when 5 then '여가비'
+          when 6 then '기타'
+          else '기타'
+        end,
+        cast(u.cost as long),
+        u.memo,
+        u.date
+      )
+      from org.zerock.triplet.domain.card.entity.CardUsage u
+      where u.memberCard.id = :mcardId
+        and u.date >= :from
+        and u.date < :to
+      order by u.date desc, u.id desc
+    """)
+    List<UsageItem> findTripUsageItems(@Param("mcardId") Long mcardId,
+                                       @Param("from") LocalDateTime from,
+                                       @Param("to")   LocalDateTime to);
+
 }
