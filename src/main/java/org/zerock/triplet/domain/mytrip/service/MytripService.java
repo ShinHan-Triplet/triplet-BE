@@ -2,8 +2,10 @@ package org.zerock.triplet.domain.mytrip.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.zerock.triplet.domain.mytrip.dto.*;
 import org.zerock.triplet.domain.mytrip.repository.MytripRepository;
+import org.zerock.triplet.domain.trip.repository.CostRepository;
 import org.zerock.triplet.domain.trip.entity.Trip;
 
 import java.time.LocalDate;
@@ -15,6 +17,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MytripService {
     private final MytripRepository mytripRepository;
+    private final CostRepository costRepository;
 
     public TripListResponse getMyTrips(Long memberId) {
         // 1) 접근가능한 Trip들
@@ -74,54 +77,6 @@ public class MytripService {
                 .trips(items)
                 .build();
     }
-
-//    public TripDetailResponse getTripDetail(Long tripId, Long meId) {
-//        // 1) 헤더(+권한검증)
-//        TripHeader header = mytripRepository.findTripHeader(tripId, meId)
-//                .orElse(null);
-//        if (header == null) return null;
-//
-//        Long gatherId = header.getGatherId();
-//
-//        // 2) 멤버들
-//        List<TripMember> members = mytripRepository.findTripMembers(gatherId);
-//
-//        // 3) 카드
-//        TripCard card = mytripRepository.findTripCard(gatherId).orElse(null);
-//
-//        // 4) 내가 OWNER 인지 (long 반환 → boolean)
-//        long ownerCnt = mytripRepository.countOwner(gatherId, meId);
-//        int owner = ownerCnt > 0 ? 1 : 0;
-//
-//        // 5) 최종 응답 조립 (프론트 계약 DTO)
-//        return TripDetailResponse.builder()
-//                .tripId(header.getTripId())
-//                .title(header.getTitle())
-//                .gatherName(null) // 필요 시 Gather 엔티티에 name 있으면 별도 질의로 조회/주입
-//                .members(members.stream()
-//                        .map(m -> TripMember.builder()
-//                                .memberId(m.getMemberId())
-//                                .name(m.getName())
-//                                .build())
-//                        .toList())
-//                .startDate(header.getStartDate().toLocalDate())
-//                .endDate(header.getEndDate().toLocalDate())
-//                .theme(String.valueOf(header.getTheme())) // 기존 계약이 문자열이면 변환
-//                .thumbnail(header.getThumbnail())
-//                .status(null) // 필요 시 채우기
-//                .card(card == null ? null :
-//                        TripCard.builder()
-//                                .mcardId(card.getMcardId())
-//                                .cardId(card.getCardId())
-//                                .cardName(card.getCardName())
-//                                .cardNickname(card.getCardNickname())
-//                                .cardNum(card.getCardNum())
-//                                .account(card.getAccount())
-//                                .status(card.getStatus())
-//                                .build())
-//                .budget(List.of()) // 예산 테이블 미정이면 일단 빈 리스트
-//                .build();
-//    }
 
     /** 내 여행 상세 (레포트 헤더 + 예산 요약 + 카드 + 멤버) */
     public TripDetailResponse getTripDetail(Long tripId, Long memberId) {
@@ -287,5 +242,10 @@ public class MytripService {
                         .items(items)
                         .build())
                 .build();
+    }
+
+    @Transactional
+    public List<CostPlan> getCostPlan(Long tripId){
+        return costRepository.findPlansByTripId(tripId);
     }
 }

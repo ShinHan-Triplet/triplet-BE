@@ -84,6 +84,7 @@ public class TripPublishService {
 
             Gather g = new Gather();
             g.setName(Objects.requireNonNullElse(ng.getName(), "새 모임"));
+            membercardRepo.markCheckGather(ng.getMcardId(), true);
             g.setMcard(membercardRepo.findMemberCardById(ng.getMcardId()));
             gathers.save(g);
 
@@ -109,15 +110,42 @@ public class TripPublishService {
         t.setStartDate(start.atStartOfDay());
         t.setEndDate(end.atStartOfDay());
 
-        Long stay = Long.parseLong(d.getBudgets().getStay());
-        Long ins = Long.parseLong(d.getBudgets().getInsurance());
-        int daysSum = sumDaySnapshots(d);
+        var budgets = d.getBudgets();
+//        Long stay = parseLongSafe(d.getBudgets().getStay());
+//        Long ins = parseLongSafe(d.getBudgets().getInsurance());
+//        int daysSum = sumDaySnapshots(d);
+//
+//        t.setStayCost(stay);
+//        t.setInsuranceCost(ins);
+//        t.setTotalCost(stay + ins + daysSum);
+//        t.setTripImg(d.getCover().getViewUrl());
+        long stay = parseLongSafe(budgets != null ? budgets.getStay()      : null);
+        long ins  = parseLongSafe(budgets != null ? budgets.getInsurance() : null);
+
+        long daysSum = sumDaySnapshotsLong(d); // int→long로 합산
 
         t.setStayCost(stay);
         t.setInsuranceCost(ins);
         t.setTotalCost(stay + ins + daysSum);
-        t.setTripImg(d.getCover().getViewUrl());
+
+        // ★ 커버 null-safe
+        var cover = d.getCover();
+        t.setTripImg(cover != null ? cover.getViewUrl() : null);
         return t;
+    }
+    private static long parseLongSafe(String s) {
+        try { return (s == null || s.isBlank()) ? 0L : Long.parseLong(s); }
+        catch (Exception e) { return 0L; }
+    }
+    private static long sumDaySnapshotsLong(Draft d) {
+        if (d.getBudgets()==null || d.getBudgets().getDays()==null) return 0L;
+        return d.getBudgets().getDays().values().stream().mapToLong(x -> {
+            var a = x.getAmounts();
+            return parseLongSafe(a!=null ? a.get("food")      : null)
+                    + parseLongSafe(a!=null ? a.get("transport") : null)
+                    + parseLongSafe(a!=null ? a.get("leisure")   : null)
+                    + parseLongSafe(a!=null ? a.get("etc")       : null);
+        }).sum();
     }
 
     private void persistCostFromDraft(Draft d, Trip trip){
