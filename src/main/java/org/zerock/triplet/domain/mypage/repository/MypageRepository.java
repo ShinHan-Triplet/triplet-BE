@@ -1,8 +1,10 @@
 package org.zerock.triplet.domain.mypage.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 import org.zerock.triplet.domain.gather.entity.Gather;
 
 import java.util.Collection;
@@ -42,4 +44,33 @@ public interface MypageRepository extends JpaRepository<Gather, Long> {
     """)
     List<Long> findOwnerGatherIds(@Param("memberId") Long memberId,
                                   @Param("gatherIds") Collection<Long> gatherIds);
+
+    /** memberId가 gatherId의 OWNER인지 확인 */
+    @Query("""
+        select (count(gm) > 0)
+        from GatherMapping gm
+        where gm.gather.id = :gatherId
+          and gm.member.id = :memberId
+          and gm.checkOwner = true
+    """)
+    boolean isOwner(@Param("gatherId") Long gatherId, @Param("memberId") Long memberId);
+
+    /** memberId가 gatherId의 구성원인지 확인 */
+    @Query("""
+        select (count(gm) > 0)
+        from GatherMapping gm
+        where gm.gather.id = :gatherId
+          and gm.member.id = :memberId
+    """)
+    boolean isMember(@Param("gatherId") Long gatherId, @Param("memberId") Long memberId);
+
+    /** 특정 구성원 모임 탈퇴 */
+    @Transactional
+    @Modifying
+    @Query("""
+        delete from GatherMapping gm
+        where gm.gather.id = :gatherId
+          and gm.member.id = :memberId
+    """)
+    int deleteMapping(@Param("gatherId") Long gatherId, @Param("memberId") Long memberId);
 }
