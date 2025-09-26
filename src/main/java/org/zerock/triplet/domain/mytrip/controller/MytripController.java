@@ -20,7 +20,7 @@ import java.util.List;
 public class MytripController {
     private final MytripService mytripService;
 
-    /** 내 여행 목록 (멤버/모임 정보 포함) */
+    // 내 여행 목록
     @GetMapping
     public TripListResponse getMyTrips(@AuthenticationPrincipal Member me) {
         if (me == null) throw new IllegalStateException("로그인이 필요합니다.");
@@ -61,5 +61,13 @@ public class MytripController {
         var body = mytripService.getUsagesByDate(tripId, date, me.getId().longValue());
         if (body == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(body);
+    }
+
+    // 내 여행 특정 일자 카드 상세 사용 내역
+    @GetMapping("/{tripId}/history")
+    public UsageDayResponse getTripUsages(
+            @PathVariable Long tripId,
+            @AuthenticationPrincipal Member me) {
+        return mytripService.getTripUsages(tripId, me.getId());
     }
 }

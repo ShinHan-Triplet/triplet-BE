@@ -12,5 +12,4 @@ public class BudgetTotal {
     private Long transport;
     private Long leisure;
     private Long etc;
-    private Long total;
 }
