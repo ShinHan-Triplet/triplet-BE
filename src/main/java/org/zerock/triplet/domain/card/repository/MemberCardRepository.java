@@ -39,4 +39,18 @@ public interface MemberCardRepository extends JpaRepository<MemberCard, Long> {
          where mc.id = :cardId
     """)
     void markCheckGather(@Param("cardId") Long cardId, @Param("check") Boolean check);
+
+    // 카드 상태 수정
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Transactional
+    @Query("""
+    update MemberCard mc
+       set mc.cardStatus = :status
+     where mc.id = :cardId
+       and mc.member.id = :memberId
+""")
+    int updateCardStatus(@Param("cardId") Long cardId,
+                         @Param("memberId") Long memberId,
+                         @Param("status") Integer status);
+
 }

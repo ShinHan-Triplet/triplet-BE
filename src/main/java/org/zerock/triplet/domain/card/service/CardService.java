@@ -91,4 +91,20 @@ public class CardService {
         String p4 = String.format("%04d", r.nextInt(0, 10000));
         return p1 + "-" + p2 + "**-****-" + p4;
     }
+
+    // 카드 분실 신고
+    public void reportLost(Long cardId, Long memberId) {
+        int updated = memberCardRepo.updateCardStatus(cardId, memberId, 2);
+        if (updated == 0) {
+            throw new IllegalArgumentException("해당 카드가 없거나 권한이 없습니다.");
+        }
+    }
+
+    // 카드 정지 해제
+    public void resume(Long cardId, Long memberId) {
+        int updated = memberCardRepo.updateCardStatus(cardId, memberId, 1);
+        if (updated == 0) {
+            throw new IllegalArgumentException("해당 카드가 없거나 권한이 없습니다.");
+        }
+    }
 }
