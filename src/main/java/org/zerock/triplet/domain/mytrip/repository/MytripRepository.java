@@ -199,11 +199,28 @@ public interface MytripRepository extends JpaRepository<Trip, Long> {
         )
         from Cost c
         where c.trip.id = :tripId
+            and c.checkPlan = :planned
     """)
         Optional<org.zerock.triplet.domain.mytrip.dto.BudgetTotal> findBudgetTotal(
                 @Param("tripId") Long tripId,
                 @Param("planned") Boolean planned
         );
+
+    @Query("""
+    select new org.zerock.triplet.domain.mytrip.dto.BudgetUsed(
+        u.category, sum(u.cost)
+    )
+    from org.zerock.triplet.domain.card.entity.CardUsage u
+    where u.memberCard.id = :mcardId
+      and u.date >= :from
+      and u.date <  :to
+    group by u.category
+""")
+    List<org.zerock.triplet.domain.mytrip.dto.BudgetUsed> sumUsageByCategory(
+            @Param("mcardId") Long mcardId,
+            @Param("from") java.time.LocalDateTime from,
+            @Param("to")   java.time.LocalDateTime to
+    );
 
     @Query("""
       select new org.zerock.triplet.domain.mytrip.dto.UsageItem(
