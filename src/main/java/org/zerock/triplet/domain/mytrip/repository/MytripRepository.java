@@ -148,7 +148,8 @@ public interface MytripRepository extends JpaRepository<Trip, Long> {
         end,
         cast(u.cost as long),
         u.memo,
-        u.date
+        u.date,
+        u.memberCard.id
     )
     from CardUsage u
     where u.memberCard.id = :mcardId
@@ -237,7 +238,8 @@ public interface MytripRepository extends JpaRepository<Trip, Long> {
         end,
         cast(u.cost as long),
         u.memo,
-        u.date
+        u.date,
+        u.memberCard.id
       )
       from org.zerock.triplet.domain.card.entity.CardUsage u
       where u.memberCard.id = :mcardId

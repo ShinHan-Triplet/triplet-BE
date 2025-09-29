@@ -18,4 +18,5 @@ public class UsageItem {
     private String memo;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime costDateTime;  // 사용 시각
+    private Long mcardId;
 }
