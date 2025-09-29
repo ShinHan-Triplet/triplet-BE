@@ -24,6 +24,7 @@ public interface MemberCardRepository extends JpaRepository<MemberCard, Long> {
         join mc.card c
         where mc.member.id = :memberId
             and(mc.checkGather = false or mc.checkGather is null)
+            and mc.cardStatus = 1
     """)
     List<MemberCardDTO> findPersonalCards(@Param("memberId") Long memberId);
 

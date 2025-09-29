@@ -74,4 +74,34 @@ public class S3CoverService {
     }
 
     public record PresignResult(String objectKey, String uploadUrl, String viewUrl){}
+
+    // 수정 후 저장시 final에 바로 저장
+    public PresignResult presignForFinal(long tripId, String filename, String contentType) {
+        String ext = (filename != null && filename.contains("."))
+                ? filename.substring(filename.lastIndexOf('.')) : ".jpg";
+
+        String key = "%s/%d/cover/%s%s".formatted(publicPrefix, tripId, UUID.randomUUID(), ext);
+
+        String ct = (contentType == null || contentType.isBlank())
+                ? "application/octet-stream" : contentType;
+
+        var put = PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .contentType(ct)
+                .build();
+
+        var preq = PutObjectPresignRequest.builder()
+                .signatureDuration(Duration.ofMinutes(5))
+                .putObjectRequest(put)
+                .build();
+
+        var presigned = presigner.presignPutObject(preq);
+
+        String viewUrl = s3.utilities()
+                .getUrl(b -> b.bucket(bucket).key(key).region(Region.of(region)))
+                .toString();
+
+        return new PresignResult(key, presigned.url().toString(), viewUrl);
+    }
 }

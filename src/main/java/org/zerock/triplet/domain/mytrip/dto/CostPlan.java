@@ -16,4 +16,5 @@ public class CostPlan {
     private Long  leisure;
     private Long  etc;
     private Boolean checkPlan;
+    private Long costId;
 }

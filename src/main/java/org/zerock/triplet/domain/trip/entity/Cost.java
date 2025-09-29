@@ -1,6 +1,7 @@
 package org.zerock.triplet.domain.trip.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
