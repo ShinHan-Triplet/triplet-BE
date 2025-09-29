@@ -81,21 +81,14 @@ public class MytripService {
     /** 내 여행 상세 (레포트 헤더 + 예산 요약 + 카드 + 멤버) */
     public TripDetailResponse getTripDetail(Long tripId, Long memberId) {
         // 1) 헤더 (권한 포함)
-        var h = mytripRepository.findTripHeader(tripId, memberId).get();
-        if (h == null) return null;
-
+        var h = mytripRepository.findTripHeader(tripId, memberId).orElseThrow();
         // 2) 구성원
-        var members = mytripRepository.findMembersByGatherId(h.getGatherId()).stream()
-                .map(m -> TripMember.builder()
-                        .memberId(m.getMemberId())
-                        .name(m.getName())
-                        .build())
-                .collect(Collectors.toList());
-
-        // 3) 대표 카드 (별도 1쿼리 유지)
-        var cr = mytripRepository.findGatherCardByTripId(tripId).get();
+        var members = mytripRepository.findTripMembers(h.getGatherId());
+        // 3) 대표 카드
+        var crOpt = mytripRepository.findGatherCardByTripId(tripId);
         TripCard card = null;
-        if (cr != null) {
+        if (crOpt.isPresent()) {
+            var cr = crOpt.get();
             card = TripCard.builder()
                     .mcardId(cr.getMcardId())
                     .cardId(cr.getCardId())
@@ -107,61 +100,50 @@ public class MytripService {
                     .build();
         }
 
-        // 4) 카테고리별 합계 산출
-        // 4-1) 숙박/보험: trips에서 계획액
-        var planBasics = mytripRepository.findTripPlanBasics(tripId);
-        long stayPlanned      = planBasics.get().getStayCost();
-        long insurancePlanned = planBasics.get().getInsuranceCost();
+        // 4) 계획(planned)
+        var planBasics = mytripRepository.findTripPlanBasics(tripId).orElseThrow();
+        long stayPlanned      = planBasics.getStayCost();
+        long insurancePlanned = planBasics.getInsuranceCost();
 
-        // 4-2) 식비/교통/여가/기타: cost 합계 (계획=1 / 실사용=0)
         var planSum = mytripRepository.findBudgetTotal(tripId, true)
                 .orElse(new BudgetTotal(0L,0L,0L,0L));
-        var usedSum = mytripRepository.findBudgetTotal(tripId, false)
-                .orElse(new BudgetTotal(0L,0L,0L,0L));
-
         long planFood = planSum.getFood();
         long planTrans = planSum.getTransport();
         long planLeis = planSum.getLeisure();
         long planEtc  = planSum.getEtc();
 
-        long usedFood = usedSum.getFood();
-        long usedTrans = usedSum.getTransport();
-        long usedLeis  = usedSum.getLeisure();
-        long usedEtc   = usedSum.getEtc();
+        // 5) 사용(used) — 카드 사용내역에서 카테고리별 집계
+        Long mcardId = mytripRepository.findTripMcardId(tripId).orElse(null);
+        Map<Integer, Long> usedMap = new HashMap<>();
+        if (mcardId != null) {
+            var from = h.getStartDate().toLocalDate().atStartOfDay();
+            var to   = h.getEndDate().toLocalDate().plusDays(1).atStartOfDay();
 
-        // 4-3) DTO가 요구하는 카테고리 BudgetItem 리스트
+            var usedRows = mytripRepository.sumUsageByCategory(mcardId, from, to);
+            for (var r : usedRows) {
+                usedMap.put(r.getCategoryId(), r.getUsed() == null ? 0L : r.getUsed());
+            }
+        }
+        long usedStay  = usedMap.getOrDefault(1, 0L);
+        long usedIns   = usedMap.getOrDefault(2, 0L);
+        long usedFood  = usedMap.getOrDefault(3, 0L);
+        long usedTrans = usedMap.getOrDefault(4, 0L);
+        long usedLeis  = usedMap.getOrDefault(5, 0L);
+        long usedEtc   = usedMap.getOrDefault(6, 0L);
+
+        // 6) BudgetItem 리스트 조립 (planned vs used 정확)
         var budget = List.of(
-                BudgetItem.builder()
-                        .categoryId(1).categoryName("숙박비")
-                        .planned(stayPlanned).used(0L)
-                        .build(),
-                BudgetItem.builder()
-                        .categoryId(2).categoryName("보험비")
-                        .planned(insurancePlanned).used(0L)
-                        .build(),
-                BudgetItem.builder()
-                        .categoryId(3).categoryName("식비")
-                        .planned(planFood).used(usedFood)
-                        .build(),
-                BudgetItem.builder()
-                        .categoryId(4).categoryName("교통비")
-                        .planned(planTrans).used(usedTrans)
-                        .build(),
-                BudgetItem.builder()
-                        .categoryId(5).categoryName("여가비")
-                        .planned(planLeis).used(usedLeis)
-                        .build(),
-                BudgetItem.builder()
-                        .categoryId(6).categoryName("기타")
-                        .planned(planEtc).used(usedEtc)
-                        .build()
+                BudgetItem.builder().categoryId(1).categoryName("숙박비").planned(stayPlanned)      .used(usedStay)  .build(),
+                BudgetItem.builder().categoryId(2).categoryName("보험비").planned(insurancePlanned) .used(usedIns)   .build(),
+                BudgetItem.builder().categoryId(3).categoryName("식비")  .planned(planFood)         .used(usedFood)  .build(),
+                BudgetItem.builder().categoryId(4).categoryName("교통비").planned(planTrans)        .used(usedTrans) .build(),
+                BudgetItem.builder().categoryId(5).categoryName("여가비").planned(planLeis)         .used(usedLeis)  .build(),
+                BudgetItem.builder().categoryId(6).categoryName("기타")  .planned(planEtc)          .used(usedEtc)   .build()
         );
 
-        // 5) 상태/테마 문자열
-        String status = computeStatus(h.getStartDate(), h.getEndDate());
+        String status  = computeStatus(h.getStartDate(), h.getEndDate());
         String themeStr = mapTheme(h.getTheme());
 
-        // 6) 응답 조립
         return TripDetailResponse.builder()
                 .tripId(h.getTripId())
                 .title(h.getTitle())
@@ -264,11 +246,8 @@ public class MytripService {
                         .build())
                 .collect(Collectors.toList());
 
-        // 5) 합계 (둘 중 택1)
-        // (A) DB에서 바로 합계:
+        // 5) DB에서 바로 합계
         Long total = mytripRepository.sumUsagesForDay(mcardId, from, to);
-        // (B) 자바에서 합계:
-        // long total = rows.stream().mapToLong(r -> r.getAmount() == null ? 0L : r.getAmount()).sum();
 
         return UsageDayResponse.builder()
                 .tripId(tripId)
