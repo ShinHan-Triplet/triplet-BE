@@ -114,11 +114,7 @@ public class TripPublishService {
 //        Long stay = parseLongSafe(d.getBudgets().getStay());
 //        Long ins = parseLongSafe(d.getBudgets().getInsurance());
 //        int daysSum = sumDaySnapshots(d);
-//
-//        t.setStayCost(stay);
-//        t.setInsuranceCost(ins);
-//        t.setTotalCost(stay + ins + daysSum);
-//        t.setTripImg(d.getCover().getViewUrl());
+
         long stay = parseLongSafe(budgets != null ? budgets.getStay()      : null);
         long ins  = parseLongSafe(budgets != null ? budgets.getInsurance() : null);
 
@@ -127,6 +123,7 @@ public class TripPublishService {
         t.setStayCost(stay);
         t.setInsuranceCost(ins);
         t.setTotalCost(stay + ins + daysSum);
+        t.setTripImg(d.getCover().getViewUrl());
 
         // ★ 커버 null-safe
         var cover = d.getCover();
@@ -160,7 +157,7 @@ public class TripPublishService {
             c.setTransport( Long.parseLong(a!=null ? a.get("transport") : "0") );
             c.setLeisure(   Long.parseLong(a!=null ? a.get("leisure")   : "0") );
             c.setEtc(       Long.parseLong(a!=null ? a.get("etc")       : "0") );
-            c.setCheckPlan(Boolean.TRUE.equals(snap.getNoSchedule()));
+            c.setCheckPlan(!Boolean.TRUE.equals(snap.getNoSchedule()));
             costs.save(c);
         });
     }

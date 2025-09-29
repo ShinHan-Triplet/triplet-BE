@@ -53,9 +53,5 @@ public class TripPublishController {
         }
     }
 
-    @Data
-    static class CreateFromDraftReq {
-        private Long gatherId;
-        private boolean solo;
-    }
+
 }

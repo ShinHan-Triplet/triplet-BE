@@ -1,8 +1,10 @@
 package org.zerock.triplet.domain.trip.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 import org.zerock.triplet.domain.mytrip.dto.CostPlan;
 import org.zerock.triplet.domain.trip.entity.Cost;
 
@@ -16,11 +18,18 @@ public interface CostRepository extends JpaRepository<Cost, Long> {
               c.transport,
               c.leisure,
               c.etc,
-              c.checkPlan
+              c.checkPlan,
+              c.id
         )
         from Cost c
         where c.trip.id = :tripId
         order by c.day asc
         """)
     List<CostPlan> findPlansByTripId(@Param("tripId") Long tripId);
+
+
+    @Modifying
+    @Transactional
+    @Query("delete from Cost c where c.trip.id = :tripId")
+    void deleteByTripId(@Param("tripId") Long tripId);
 }
