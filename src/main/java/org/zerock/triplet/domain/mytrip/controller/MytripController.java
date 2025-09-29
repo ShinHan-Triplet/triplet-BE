@@ -186,4 +186,13 @@ public class MytripController {
 
     }
 
+    // 여행 삭제
+    @DeleteMapping("/{tripId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteTrip(@PathVariable Long tripId,
+                           @AuthenticationPrincipal Member me) {
+        if (me == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        mytripService.deleteTrip(me.getId(), tripId);
+    }
+
 }
