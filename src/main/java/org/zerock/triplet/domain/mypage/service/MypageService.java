@@ -76,20 +76,24 @@ public class MypageService {
     // 모임 삭제(모임장 전용)
     @Transactional
     public void deleteGatherForOwner(Long gatherId, Long memberId) {
-        // 존재 확인 (Optional)
         if (!mypageRepository.existsById(gatherId)) {
             throw new IllegalArgumentException("존재하지 않는 모임입니다.");
         }
 
-        // 권한 확인
-        boolean isOwner = mypageRepository.isOwner(gatherId, memberId);
-        if (!isOwner) {
+        if (!mypageRepository.isOwner(gatherId, memberId)) {
             throw new AccessDeniedException("모임 삭제 권한이 없습니다. (모임장만 가능)");
         }
 
-        // 삭제
+        // 1) Trip 삭제
+        mypageRepository.deleteTripsByGather(gatherId);
+
+        // 2) GatherMapping 삭제
+        mypageRepository.deleteMappingsByGather(gatherId);
+
+        // 3) Gather 본체 삭제
         mypageRepository.deleteById(gatherId);
     }
+
 
     // 모임 탈퇴(구성원 전용)
     @Transactional

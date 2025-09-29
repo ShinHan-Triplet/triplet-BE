@@ -72,7 +72,8 @@ public interface MycardRepository extends JpaRepository<MemberCard, Long> {
             u.category,
             u.cost,
             u.date,
-            u.memo
+            u.memo,
+            mc.id
         )
         from MemberCard mc
         join mc.usages u

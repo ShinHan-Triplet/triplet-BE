@@ -40,4 +40,18 @@ public class CardController {
         return ResponseEntity.created(location).body(saved.getId());
     }
 
+    @PatchMapping("/mycard/{cardId}/report")
+    public ResponseEntity<Void> reportLost(@PathVariable Long cardId,
+                                           @AuthenticationPrincipal Member me) {
+        service.reportLost(cardId, me.getId());
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/mycard/{cardId}/resume")
+    public ResponseEntity<Void> resumeCard(@PathVariable Long cardId,
+                                           @AuthenticationPrincipal Member me) {
+        service.resume(cardId, me.getId());
+        return ResponseEntity.ok().build();
+    }
+
 }

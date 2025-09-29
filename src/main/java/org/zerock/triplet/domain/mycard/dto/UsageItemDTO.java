@@ -22,4 +22,7 @@ public class UsageItemDTO {
     private LocalDateTime costDate;
 
     private String memo;
+
+    @JsonProperty("mcardId")
+    private Long mcardId;
 }

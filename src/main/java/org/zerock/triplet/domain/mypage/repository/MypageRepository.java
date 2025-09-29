@@ -73,4 +73,22 @@ public interface MypageRepository extends JpaRepository<Gather, Long> {
           and gm.member.id = :memberId
     """)
     int deleteMapping(@Param("gatherId") Long gatherId, @Param("memberId") Long memberId);
+
+    // Trip 본체: 이 모임(gatherId)에 속한 모든 여행 삭제
+    @Transactional
+    @Modifying
+    @Query("""
+        delete from Trip t
+        where t.gatherId = :gatherId
+    """)
+    int deleteTripsByGather(@Param("gatherId") Long gatherId);
+
+    // 모임-멤버 매핑: 해당 모임의 매핑 전부 삭제
+    @Transactional
+    @Modifying
+    @Query("""
+        delete from GatherMapping gm
+        where gm.gather.id = :gatherId
+    """)
+    int deleteMappingsByGather(@Param("gatherId") Long gatherId);
 }
