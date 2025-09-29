@@ -153,10 +153,10 @@ public class TripPublishService {
             Cost c = new Cost();
             c.setTrip(trip);
             c.setDay(day);
-            c.setFood(      Long.parseLong(a!=null ? a.get("food")      : "0") );
-            c.setTransport( Long.parseLong(a!=null ? a.get("transport") : "0") );
-            c.setLeisure(   Long.parseLong(a!=null ? a.get("leisure")   : "0") );
-            c.setEtc(       Long.parseLong(a!=null ? a.get("etc")       : "0") );
+            c.setFood(      parseLongSafe(a != null ? a.get("food")      : null));
+            c.setTransport( parseLongSafe(a != null ? a.get("transport") : null));
+            c.setLeisure(   parseLongSafe(a != null ? a.get("leisure")   : null));
+            c.setEtc(       parseLongSafe(a != null ? a.get("etc")       : null));
             c.setCheckPlan(!Boolean.TRUE.equals(snap.getNoSchedule()));
             costs.save(c);
         });

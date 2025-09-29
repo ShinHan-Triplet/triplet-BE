@@ -1,8 +1,10 @@
 package org.zerock.triplet.domain.mytrip.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import org.zerock.triplet.domain.mytrip.dto.*;
 import org.zerock.triplet.domain.mytrip.repository.MytripRepository;
 import org.zerock.triplet.domain.trip.repository.CostRepository;
@@ -257,6 +259,24 @@ public class MytripService {
                         .items(items)
                         .build())
                 .build();
+    }
+
+    // 여행 삭제
+    @Transactional
+    public void deleteTrip(Long memberId, Long tripId) {
+        var trip = mytripRepository.findTripPlanBasics(tripId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "trip not found"));
+
+        var ownerGatherIds = mytripRepository.findOwnerGatherIds(memberId, List.of(trip.getGatherId()));
+        if (ownerGatherIds.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "no permission to delete");
+        }
+
+        // 자식 레코드 먼저 삭제
+        costRepository.deleteByTripId(tripId);
+
+        // 부모 Trip 삭제
+        mytripRepository.deleteById(tripId);
     }
 
     @Transactional
