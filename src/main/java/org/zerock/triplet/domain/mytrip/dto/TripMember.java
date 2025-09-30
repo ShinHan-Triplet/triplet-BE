@@ -10,4 +10,5 @@ import lombok.*;
 public class TripMember {
     private Long memberId;
     private String name;
+    private Boolean checkOwner;
 }

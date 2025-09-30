@@ -45,7 +45,8 @@ public class MytripService {
                         r -> ((Number) r[0]).longValue(),
                         Collectors.mapping(r -> new TripMember(
                                 ((Number) r[1]).longValue(),
-                                String.valueOf(r[2])
+                                String.valueOf(r[2]),
+                                (Boolean) r[3]
                         ), Collectors.toList())
                 ));
 

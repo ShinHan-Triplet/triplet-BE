@@ -69,6 +69,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/trips/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/mytrip/**").permitAll()
                         .requestMatchers("/api/mytrip/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/card/list").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/refresh", "/api/auth/logout").permitAll()
                         .anyRequest().authenticated()
                 )
