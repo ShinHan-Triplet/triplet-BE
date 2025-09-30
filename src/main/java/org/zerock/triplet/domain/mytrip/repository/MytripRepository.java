@@ -35,17 +35,19 @@ public interface MytripRepository extends JpaRepository<Trip, Long> {
 
     /** 여러 모임의 (모임ID, 멤버ID, 멤버명) */
     @Query("""
-        select gm.gather.id, m.id, m.name
+        select gm.gather.id, m.id, m.name, gm.checkOwner
         from GatherMapping gm
         join gm.member m
         where gm.gather.id in :gatherIds
-        order by gm.gather.id, m.name
+        order by gm.gather.id,
+            case when gm.checkOwner = true then 0 else 1 end,
+            m.name asc
     """)
     List<Object[]> findMembersByGatherIds(@Param("gatherIds") Collection<Long> gatherIds);
 
     @Query("""
         select new org.zerock.triplet.domain.mytrip.dto.TripMember(
-            m.id, m.name
+            m.id, m.name, gm.checkOwner
         )
         from GatherMapping gm
         join gm.member m
@@ -87,12 +89,14 @@ public interface MytripRepository extends JpaRepository<Trip, Long> {
     /** (상세) 멤버 목록: gatherId 기준 */
     @Query("""
         select new org.zerock.triplet.domain.mytrip.dto.TripMember(
-            m.id, m.name
+            m.id, m.name, gm.checkOwner
         )
         from GatherMapping gm
         join gm.member m
         where gm.gather.id = :gatherId
-        order by m.name asc
+        order by 
+            case when gm.checkOwner = true then 0 else 1 end,
+            m.name asc
     """)
     List<TripMember> findTripMembers(@Param("gatherId") Long gatherId);
 
