@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.zerock.triplet.domain.card.repository.MemberCardRepository;
 import org.zerock.triplet.domain.gather.entity.Gather;
+import org.zerock.triplet.domain.gather.repository.GatherRepository;
 import org.zerock.triplet.domain.member.entity.Member;
 import org.zerock.triplet.domain.member.repository.MemberRepository;
 import org.zerock.triplet.domain.mypage.dto.MypageDTO;
@@ -22,6 +24,8 @@ public class MypageService {
 
     private final MemberRepository memberRepository;
     private final MypageRepository mypageRepository;
+    private final MemberCardRepository memberCardRepository;
+    private final GatherRepository gatherRepository;
 
     // ===== 공통 유틸 =====
     private static Integer toInt(Object o) {
@@ -86,6 +90,9 @@ public class MypageService {
 
         // 1) Trip 삭제
         mypageRepository.deleteTripsByGather(gatherId);
+
+        // 카드 상태 변경
+        memberCardRepository.markCheckGather(gatherRepository.findGatherById(gatherId).getMcard().getId(), false);
 
         // 2) GatherMapping 삭제
         mypageRepository.deleteMappingsByGather(gatherId);

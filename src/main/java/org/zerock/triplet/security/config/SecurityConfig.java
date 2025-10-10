@@ -38,7 +38,7 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration c = new CorsConfiguration();
         c.setAllowCredentials(true);
-        c.setAllowedOrigins(List.of("http://localhost:3000","http://localhost:5173"));
+        c.setAllowedOrigins(List.of("http://localhost:3000","http://localhost:5173","https://triplet.shinhanacademy.co.kr"));
         c.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
         c.setAllowedHeaders(List.of("Authorization","Content-Type","X-Requested-With"));
         c.setExposedHeaders(List.of("Authorization","Content-Type"));
